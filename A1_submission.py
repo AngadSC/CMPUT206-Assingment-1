@@ -15,9 +15,13 @@ def part1_histogram_compute():
     """add your code here"""
     n = 128
 
-    hist = # 128-bin Histogram computed by your code (cannot use in-built functions!)
+    hist = np.zeros(n,dtype=int)
+    bin_width= 256/n # 128-bin Histogram computed by your code (cannot use in-built functions!)
+    for i in img.flatten():
+        bin_index = int(i//bin_width)
+        hist[bin_index] +=1 
 
-    hist_np, _ = # Histogram computed by numpy
+    hist_np, _ = np.histogram(img, bins=n, range = (0,256))
 
 
     """Plotting code provided here
@@ -33,7 +37,7 @@ def part1_histogram_compute():
 
     plt.show()
 
-
+'''
 def part2_histogram_equalization():
     filename = r'test.jpg'
     image = io.imread(filename, as_gray=True)
@@ -167,7 +171,7 @@ def part4_histogram_matching():
     matched_rgb = ...
     
     show_with_cdf(source_rgb, template_rgb, matched_rgb, 'RGB')
-
+'''
 if __name__ == '__main__':
     part1_histogram_compute()
     part2_histogram_equalization()
