@@ -5,7 +5,7 @@ import numpy as np
 from skimage import io, img_as_ubyte, exposure
 import matplotlib.pyplot as plt
 
-
+'''
 def part1_histogram_compute():
     filename = r'test.jpg'
     image = io.imread(filename, as_gray=True)
@@ -36,8 +36,8 @@ def part1_histogram_compute():
     plt.xlim([0, n])
 
     plt.show()
-
 '''
+
 def part2_histogram_equalization():
     filename = r'test.jpg'
     image = io.imread(filename, as_gray=True)
@@ -47,15 +47,35 @@ def part2_histogram_equalization():
     n_bins = 128
 
     # 128-bin Histogram computed by your code (cannot use in-built functions!)
-    hist = ...
+    hist = np.zeros(n_bins, dtype=int)
+    bin_width = 256/n_bins
+
+    for i in img.flatten():
+        bin_index = int(i // bin_width)
+        hist[bin_index] +=1
+
+    # cdf computation
+    cdf = np.cumsum(hist)
+    cdf_min = cdf[0]
+    total_pixels = img.size
+    cdf_normal = (cdf - cdf_min) / (total_pixels - cdf_min) *255
+
 
     #Initialize another image img_eq (you can use np.zeros) and update the pixel intensities in every location
 
-    img_eq = # Equalized image computed by your code
+    img_eq = np.zeros_like(img)
+    for i in range(img.shape[1]):
+        for j in range(img.shape[1]):
+            pixel = img[i,j]
+            bin_index = int(pixel//bin_width)
+            img_eq[i,j] = cdf_normal[bin_index]
     
 
     # Histogram of equalized image
-    hist_eq = ...
+    hist_eq = np.zeros(n_bins, dtype=int)
+    for pixel in img_eq.flatten():
+        bin_index = int(pixel//bin_width)
+        hist_eq[bin_index] +=1
 
     """Plotting code provided here
     Make sure to match the variable names in your code!"""
@@ -69,7 +89,7 @@ def part2_histogram_equalization():
     plt.xlim([0, n_bins])
     
     plt.show()   
-
+'''
 
 def part3_histogram_comparing():
 
@@ -173,7 +193,7 @@ def part4_histogram_matching():
     show_with_cdf(source_rgb, template_rgb, matched_rgb, 'RGB')
 '''
 if __name__ == '__main__':
-    part1_histogram_compute()
+   # part1_histogram_compute()
     part2_histogram_equalization()
     part3_histogram_comparing()
     part4_histogram_matching()
