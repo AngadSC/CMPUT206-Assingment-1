@@ -5,7 +5,7 @@ import numpy as np
 from skimage import io, img_as_ubyte, exposure
 import matplotlib.pyplot as plt
 
-'''
+
 def part1_histogram_compute():
     filename = r'test.jpg'
     image = io.imread(filename, as_gray=True)
@@ -16,7 +16,7 @@ def part1_histogram_compute():
     n = 128
 
     hist = np.zeros(n,dtype=int)
-    bin_width= 256/n # 128-bin Histogram computed by your code (cannot use in-built functions!)
+    bin_width= 256/n 
     for i in img.flatten():
         bin_index = int(i//bin_width)
         hist[bin_index] +=1 
@@ -36,7 +36,7 @@ def part1_histogram_compute():
     plt.xlim([0, n])
 
     plt.show()
-'''
+
 
 def part2_histogram_equalization():
     filename = r'test.jpg'
@@ -55,7 +55,11 @@ def part2_histogram_equalization():
         hist[bin_index] +=1
 
     # cdf computation
-    cdf = np.cumsum(hist)
+    cdf = np.zeros(n_bins)
+    cdf[0] = hist[0]
+    for n in range(1, n_bins):
+        cdf[n] = cdf[n-1] + hist[n]
+
     cdf_min = cdf[0]
     total_pixels = img.size
     cdf_normal = (cdf - cdf_min) / (total_pixels - cdf_min) *255
@@ -64,7 +68,7 @@ def part2_histogram_equalization():
     #Initialize another image img_eq (you can use np.zeros) and update the pixel intensities in every location
 
     img_eq = np.zeros_like(img)
-    for i in range(img.shape[1]):
+    for i in range(img.shape[0]):
         for j in range(img.shape[1]):
             pixel = img[i,j]
             bin_index = int(pixel//bin_width)
@@ -89,7 +93,7 @@ def part2_histogram_equalization():
     plt.xlim([0, n_bins])
     
     plt.show()   
-'''
+
 
 def part3_histogram_comparing():
 
@@ -106,15 +110,26 @@ def part3_histogram_comparing():
     #Append the Bhattacharyya coefficient for each bin to this list
     bc_all = []
 
+    for n_bins in n_bins_all:
+        hist1, _ = np.histogram(img1, bins=n_bins, range=(0,256), density=True)
+        hist2, _ = np.histogram(img2, bins=n_bins, range=(0,256), density=True)
+        hist1 = hist1 / np.sum(hist1)
+        hist2 = hist2 / np.sum(hist2)
+
+        bc = np.sum(np.sqrt(hist1*hist2))
+        bc_all.append(bc)
+
+        print(f"bins: {n_bins} Bhattacharyya Coefficient: {bc:.4f}")
+
     plt.plot(n_bins_all, bc_all, marker='o')
     plt.xlabel('Number of bins')
     plt.ylabel('Bhattacharyya Coefficient')
     plt.show()
 
 def ecdf(x):
-    """
-    TODO: Complete this function (you can use skimage.exposure.cumulative_distribution)
-    """
+    
+    nbins = np.sort(x.ravel())
+    cdf = np.arrange(1, len(nbins) +1) / len(nbins)
 
     return nbins, cdf
 
@@ -151,7 +166,7 @@ def show_with_cdf(source_gs, template_gs, matched_gs, name):
 
     plt.show()
 
-
+''''
 def part4_histogram_matching():
     filename1 = 'day.jpg'
     filename2 = 'night.jpg'
@@ -193,7 +208,7 @@ def part4_histogram_matching():
     show_with_cdf(source_rgb, template_rgb, matched_rgb, 'RGB')
 '''
 if __name__ == '__main__':
-   # part1_histogram_compute()
-    part2_histogram_equalization()
+    #part1_histogram_compute()
+   # part2_histogram_equalization()
     part3_histogram_comparing()
-    part4_histogram_matching()
+   # part4_histogram_matching()
