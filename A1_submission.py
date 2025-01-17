@@ -166,7 +166,7 @@ def show_with_cdf(source_gs, template_gs, matched_gs, name):
 
     plt.show()
 
-''''
+
 def part4_histogram_matching():
     filename1 = 'day.jpg'
     filename2 = 'night.jpg'
@@ -186,7 +186,27 @@ def part4_histogram_matching():
     
     
     """add your code here"""
-    matched_gs = ...
+    n_bins=128
+    source_hist, _ = np.histogram(source_gs, bins=n_bins, range=(0, 256), density=True)
+    template_hist, _ = np.histogram(template_gs, bins=n_bins, range=(0, 256), density=True)
+    
+    PA = np.cumsum(source_hist)
+    PR = np.cumsum(template_hist)
+
+    A = np.zeros(n_bins, dtype=np.uint8)
+    for a in range(n_bins):
+        a_prime = 0
+        while a_prime < n_bins -1 and PA[a] > PR[a_prime]:
+            a_prime+=1
+        A[a]= a_prime
+
+    matched_gs = np.zeros_like(source_gs)
+    for i in range(source_gs.shape[0]):
+        for j in range(source_gs.shape[1]):
+            pixel_value = source_gs[i,j]
+            bin_index = int(pixel_value*n_bins/256)
+            matched_gs[i,j] = A[bin_index] *256//n_bins
+
 
     show_with_cdf(source_gs, template_gs, matched_gs, 'Grayscale')
 
@@ -203,12 +223,38 @@ def part4_histogram_matching():
 
     """add your code here"""
     ## HINT: Repeat what you did for grayscale, but for each channel of the RGB image.
-    matched_rgb = ...
+    matched_rgb = np.zeros_like(source_rgb)
+
+    for c in range(3):
+        source_channel = source_rgb[:, :, c]
+        template_channel = template_rgb[:, :, c]
+
+        source_hist, _ = np.histogram(source_channel, bins=n_bins, range=(0, 256), density=True)
+        template_hist, _ = np.histogram(template_channel, bins=n_bins, range=(0, 256), density=True)
+
+        PA = np.cumsum(source_hist)
+        PR = np.cumsum(template_hist)
+
+        A = np.zeros(n_bins, dtype=np.uint8)
+        for a in range(n_bins):
+            a_prime = 0
+            while a_prime < n_bins - 1 and PA[a] > PR[a_prime]:
+                a_prime += 1
+            A[a] = a_prime
+
+        matched_channel = np.zeros_like(source_channel)
+        for i in range(source_channel.shape[0]):
+            for j in range(source_channel.shape[1]):
+                pixel_value = source_channel[i, j]
+                bin_index = int(pixel_value * n_bins / 256)
+                matched_channel[i, j] = A[bin_index] * 256 // n_bins
+        
+        matched_rgb[:, :, c] = matched_channel
     
     show_with_cdf(source_rgb, template_rgb, matched_rgb, 'RGB')
-'''
+
 if __name__ == '__main__':
     #part1_histogram_compute()
    # part2_histogram_equalization()
-    part3_histogram_comparing()
-   # part4_histogram_matching()
+   # part3_histogram_comparing()
+    part4_histogram_matching()
