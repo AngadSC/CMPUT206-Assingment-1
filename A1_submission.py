@@ -129,7 +129,7 @@ def part3_histogram_comparing():
 def ecdf(x):
     
     nbins = np.sort(x.ravel())
-    cdf = np.arrange(1, len(nbins) +1) / len(nbins)
+    cdf = np.arange(1, len(nbins) +1) / len(nbins)
 
     return nbins, cdf
 
