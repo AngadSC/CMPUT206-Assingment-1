@@ -166,95 +166,56 @@ def show_with_cdf(source_gs, template_gs, matched_gs, name):
 
     plt.show()
 
+def match_histograms(input_image, reference_image):
+    
+    input_hist, _ = np.histogram(input_image.flatten(), bins=256, range=(0, 256))
+    reference_hist, _ = np.histogram(reference_image.flatten(), bins=256, range=(0, 256))
+
+    input_cdf = np.cumsum(input_hist).astype(float)
+    input_cdf /= input_cdf[-1]
+
+    reference_cdf = np.cumsum(reference_hist).astype(float)
+    reference_cdf /= reference_cdf[-1]
+
+    mapping = np.zeros(256, dtype=np.uint8)
+    ref_idx = 0
+    for inp_idx in range(256):
+        while ref_idx < 255 and reference_cdf[ref_idx] < input_cdf[inp_idx]:
+            ref_idx += 1
+        mapping[inp_idx] = ref_idx
+
+    matched_image = mapping[input_image]
+    return matched_image
 
 def part4_histogram_matching():
     filename1 = 'day.jpg'
     filename2 = 'night.jpg'
 
-    #============Grayscale============
-
-    # Read in the image
-    source_gs = io.imread(filename1,
-                           as_gray=True
-                           )
+    # ============ Grayscale ============
+    source_gs = io.imread(filename1, as_gray=True)
     source_gs = img_as_ubyte(source_gs)
-    # Read in another image
-    template_gs = io.imread(filename2,
-                             as_gray=True
-                             )
+
+    template_gs = io.imread(filename2, as_gray=True)
     template_gs = img_as_ubyte(template_gs)
-    
-    
-    """add your code here"""
-    n_bins=128
-    source_hist, _ = np.histogram(source_gs, bins=n_bins, range=(0, 256), density=True)
-    template_hist, _ = np.histogram(template_gs, bins=n_bins, range=(0, 256), density=True)
-    
-    PA = np.cumsum(source_hist)
-    PR = np.cumsum(template_hist)
 
-    A = np.zeros(n_bins, dtype=np.uint8)
-    for a in range(n_bins):
-        a_prime = 0
-        while a_prime < n_bins -1 and PA[a] > PR[a_prime]:
-            a_prime+=1
-        A[a]= a_prime
+    matched_gs = match_histograms(source_gs, template_gs)
+    show_with_cdf(source_gs, template_gs, matched_gs, "Grayscale")
 
-    matched_gs = np.zeros_like(source_gs)
-    for i in range(source_gs.shape[0]):
-        for j in range(source_gs.shape[1]):
-            pixel_value = source_gs[i,j]
-            bin_index = int(pixel_value*n_bins/256)
-            matched_gs[i,j] = A[bin_index] *256//n_bins
+    # ============ RGB ============
+    source_rgb = io.imread(filename1)
+    template_rgb = io.imread(filename2)
 
-
-    show_with_cdf(source_gs, template_gs, matched_gs, 'Grayscale')
-
-    #============RGB============
-    # Read in the image
-    source_rgb = io.imread(filename1,
-                           # as_gray=True
-                           )
-    # Read in another image
-    template_rgb = io.imread(filename2,
-                             # as_gray=True
-                             )
-    
-
-    """add your code here"""
-    ## HINT: Repeat what you did for grayscale, but for each channel of the RGB image.
     matched_rgb = np.zeros_like(source_rgb)
 
-    for c in range(3):
-        source_channel = source_rgb[:, :, c]
-        template_channel = template_rgb[:, :, c]
+    for channel in range(3):
+        matched_rgb[:, :, channel] = match_histograms(source_rgb[:, :, channel], template_rgb[:, :, channel])
 
-        source_hist, _ = np.histogram(source_channel, bins=n_bins, range=(0, 256), density=True)
-        template_hist, _ = np.histogram(template_channel, bins=n_bins, range=(0, 256), density=True)
+    show_with_cdf(source_rgb, template_rgb, matched_rgb, "RGB")
 
-        PA = np.cumsum(source_hist)
-        PR = np.cumsum(template_hist)
 
-        A = np.zeros(n_bins, dtype=np.uint8)
-        for a in range(n_bins):
-            a_prime = 0
-            while a_prime < n_bins - 1 and PA[a] > PR[a_prime]:
-                a_prime += 1
-            A[a] = a_prime
-
-        matched_channel = np.zeros_like(source_channel)
-        for i in range(source_channel.shape[0]):
-            for j in range(source_channel.shape[1]):
-                pixel_value = source_channel[i, j]
-                bin_index = int(pixel_value * n_bins / 256)
-                matched_channel[i, j] = A[bin_index] * 256 // n_bins
-        
-        matched_rgb[:, :, c] = matched_channel
-    
-    show_with_cdf(source_rgb, template_rgb, matched_rgb, 'RGB')
 
 if __name__ == '__main__':
-    #part1_histogram_compute()
-   # part2_histogram_equalization()
-   # part3_histogram_comparing()
+    part1_histogram_compute()
+    part2_histogram_equalization()
+    part3_histogram_comparing()
     part4_histogram_matching()
